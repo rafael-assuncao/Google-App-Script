@@ -1,0 +1,69 @@
+function importa_para_planilha() {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(ss.getActiveSheet().getName());
+  var start_date = new Date(ss.getActiveSheet().getRange("H5").getValue());
+  var end_date = new Date(ss.getActiveSheet().getRange("H6").getValue());
+  var calendar_name = ss.getActiveSheet().getRange("H8").getValue();
+  var cal = CalendarApp.getAllCalendars();
+  
+  ss.getActiveSheet().getRange("A2:F1000").clearContent();
+  
+  Browser.msgBox("Usando Calendario: "+ cal[0].getName());
+  events = cal[0].getEvents(start_date, end_date);
+  
+  irow = 2;
+  
+  for( i in events ) {
+    
+    evt = events[i];
+    
+    //Dia
+    sheet.getRange("A"+irow).setValue( evt.getStartTime());
+    //Mes e Ano
+    sheet.getRange("B"+irow).setValue(evt.getStartTime().getMonth()+1+"/"+evt.getStartTime().getYear());
+    //Duração em horas
+    sheet.getRange("C"+irow).setValue(Math.round((evt.getEndTime()- evt.getStartTime())/3600000*10)/10);
+    //Título
+    sheet.getRange("D"+irow).setValue( evt.getTitle() );
+    //Telefone
+    sheet.getRange("E"+irow).setValue( pega_telefone(evt.getTitle()) );
+    //Preço em reais
+    sheet.getRange("F"+irow).setValue( pega_preco(evt.getTitle()) );
+    
+    irow ++;
+
+  }
+     
+}
+
+function pega_telefone(titulo){
+  
+  var str = titulo;
+  
+  if (str) {
+    
+    if (str.indexOf('(1') > -1) {
+        return str.substr(str.indexOf(')'),11);
+    }
+    
+    if (str.indexOf('9') > -1) {
+        return str.substr(str.indexOf('9'),10);
+    }return "-"
+
+
+  }return "-"
+  
+}
+
+function pega_preco(titulo){
+  
+  var str = titulo;
+  
+  if (str) {
+    if (str.indexOf(',') > -1) {
+        return str.substr(str.indexOf(',')-4,7);
+    }return "-"
+  }return "-"
+  
+}
